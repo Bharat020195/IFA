@@ -49,7 +49,7 @@ jobs:
         run: npx electron-rebuild -f -w sharp || true
 
       - name: Package Electron (Windows NSIS x64)
-        run: npx electron-builder --win nsis --x64
+       run: npx electron-builder --win nsis --x64 --publish never
 
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
