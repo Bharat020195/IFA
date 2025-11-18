@@ -163,7 +163,6 @@ export default function TestPage() {
     setCurrentQ((c) => (c < totalQuestions ? c + 1 : totalQuestions));
   }
 
-  // ---------- UPDATED: submitTest now persists results to public.results ----------
   async function submitTest() {
     clearInterval(timerRef.current);
 
