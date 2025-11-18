@@ -1,0 +1,75 @@
+{
+  "name": "quiz",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "build:next": "next build",
+    "start:next": "next start -p 3000",
+    "electron:dev": "concurrently \"next dev -p 3000\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:prod": "concurrently \"npm run build:next && npm run start:next\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:start-prod": "node ./electron/main.js",
+    "package": "npm run build:next && electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "@reduxjs/toolkit": "^2.10.1",
+    "@supabase/ssr": "^0.7.0",
+    "axios": "^1.13.2",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.553.0",
+    "next": "16.0.3",
+    "react": "19.2.0",
+    "react-datepicker": "^8.9.0",
+    "react-dom": "19.2.0",
+    "react-phone-input-2": "^2.15.1",
+    "react-redux": "^9.2.0",
+    "sonner": "^2.0.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^39.2.1",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.3",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.yourcompany.quiz",
+    "productName": "Quiz App",
+    "files": [
+      ".next/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "electron/**/*",
+      "package.json",
+      "next.config.js"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
