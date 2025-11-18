@@ -18,6 +18,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_ADMIN_API_KEY: ${{ secrets.NEXT_PUBLIC_ADMIN_API_KEY }}
+      ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
 
     steps:
       - name: Checkout repository
@@ -39,6 +40,7 @@ jobs:
           node -e "console.log('SUPABASE_ANON_KEY:', !!process.env.SUPABASE_ANON_KEY)"
           node -e "console.log('SUPABASE_SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)"
           node -e "console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+          node -e "console.log('NEXT_PUBLIC_ADMIN_API_KEY:', !!process.env.NEXT_PUBLIC_ADMIN_API_KEY)"
 
       - name: Build Next (production)
         run: npm run build:next
