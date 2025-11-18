@@ -1,16 +1,17 @@
-name: Build Windows exe
-
-on:
-  workflow_dispatch:    # lets you run it manually from Actions UI
-  push:
-    branches:
-      - main            # runs automatically on push to main; change if needed
-
 jobs:
   build-windows:
     runs-on: windows-latest
     env:
       CI: true
+      # server-side keys required by @supabase/ssr at build-time
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      # public keys for client (still fine to expose)
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_ADMIN_API_KEY: ${{ secrets.NEXT_PUBLIC_ADMIN_API_KEY }}
+      # optional: service role only if server code depends on it
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
     steps:
       - name: Checkout repo
@@ -25,19 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug: verify presence of envs (prints true/false)
+        run: |
+          node -e "console.log('SUPABASE_URL:', !!process.env.SUPABASE_URL)"
+          node -e "console.log('SUPABASE_ANON_KEY:', !!process.env.SUPABASE_ANON_KEY)"
+          node -e "console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+
       - name: Build Next (production)
         run: npm run build:next
-
-      - name: (Optional) Rebuild native modules for Electron
-        # Sometimes helps with native modules like sharp; keep it if you use such libs
-        run: npx electron-rebuild -f -w sharp || true
-
-      - name: Package Electron (Windows NSIS x64)
-        run: npx electron-builder --win nsis --x64
-
-      - name: Upload Windows installer artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: dist/*.exe
-          retention-days: 7
