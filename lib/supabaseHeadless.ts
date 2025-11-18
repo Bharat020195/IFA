@@ -19,4 +19,5 @@ export const supabaseHeadless = createClient(supabaseUrl, supabaseAnon, {
 export const supabaseFromToken = (accessToken: string) =>
   createClient(supabaseUrl, supabaseAnon, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    auth: { persistSession: false }
   });
