@@ -1,26 +1,32 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   build-windows:
     runs-on: windows-latest
+
+    # Job-level env so all steps can access the secrets
     env:
-      CI: true
-      # server-side keys required by @supabase/ssr at build-time
+      CI: "true"
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      # public keys for client (still fine to expose)
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_ADMIN_API_KEY: ${{ secrets.NEXT_PUBLIC_ADMIN_API_KEY }}
-      # optional: service role only if server code depends on it
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
           cache: "npm"
 
       - name: Install dependencies
@@ -28,9 +34,24 @@ jobs:
 
       - name: Debug: verify presence of envs (prints true/false)
         run: |
+          echo "DEBUG - presence of important SUPABASE envs (true = present)"
           node -e "console.log('SUPABASE_URL:', !!process.env.SUPABASE_URL)"
           node -e "console.log('SUPABASE_ANON_KEY:', !!process.env.SUPABASE_ANON_KEY)"
+          node -e "console.log('SUPABASE_SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)"
           node -e "console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
 
       - name: Build Next (production)
         run: npm run build:next
+
+      - name: Rebuild native modules (optional, may help packaging)
+        run: npx electron-rebuild -f -w sharp || true
+
+      - name: Package Electron (Windows NSIS x64)
+        run: npx electron-builder --win nsis --x64
+
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/*.exe
+          retention-days: 7
